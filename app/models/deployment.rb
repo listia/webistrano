@@ -259,7 +259,7 @@ class Deployment < ActiveRecord::Base
     end
 
     message = []
-    message << ":exclamation:"
+    message << ":warning:" if canceled? || failed?
     message << "#{user.login.humanize} #{action} #{stage.project.name.humanize} on #{stage.name}"
 
     notify_campfire(message.join(" "), false)
