@@ -110,21 +110,26 @@ class Deployment < ActiveRecord::Base
   def complete_with_error!
     save_completed_status!(STATUS_FAILED)
     notify_per_mail
+    notify_campfire_on_complete
   end
   
   def complete_successfully!
     save_completed_status!(STATUS_SUCCESS)
     notify_per_mail
+    notify_campfire_on_complete
   end
   
   def complete_canceled!
     save_completed_status!(STATUS_CANCELED)
     notify_per_mail
+    notify_campfire_on_complete
   end
   
   # deploy through Webistrano::Deployer in background (== other process)
   # TODO - at the moment `Unix &` hack
   def deploy_in_background! 
+    notify_campfire_on_execute
+
     unless RAILS_ENV == 'test'   
       RAILS_DEFAULT_LOGGER.info "Calling other ruby process in the background in order to deploy deployment #{self.id} (stage #{self.stage.id}/#{self.stage.name})"
       system("sh -c \"cd #{RAILS_ROOT} && ruby script/runner -e #{RAILS_ENV} ' deployment = Deployment.find(#{self.id}); deployment.prompt_config = #{self.prompt_config.inspect.gsub('"', '\"')} ; Webistrano::Deployer.new(deployment).invoke_task! ' >> #{RAILS_ROOT}/log/#{RAILS_ENV}.log 2>&1\" &")
@@ -216,6 +221,64 @@ class Deployment < ActiveRecord::Base
   def notify_per_mail
     self.stage.emails.each do |email|
       Notification.deliver_deployment(self, email)
+    end
+  end
+
+  private
+
+  def humanized_task
+    case task
+      when "deploy:stop"        then ["stopped", "stop", "stopping"]
+      when "deploy:setup"       then ["setup", "setup", "setting up"]
+      when "deploy:cleanup"     then ["cleaned up", "clean up", "cleanning up"]
+      when "deploy:rollback"    then ["rolled back", "rollback", "rolling back"]
+      when "deploy:migrate"     then ["migrated", "migrate", "migrating"]
+      when "deploy:web:disable" then ["disabled", "disable", "disabling"]
+      when "deploy:web:enable"  then ["enabled", "enable", "enabling"]
+      when "deploy:restart"     then ["restarted", "restart", "restarting"]
+      when "deploy:migrations"  then ["deployed and migrated", "deploy and migrate", "deploying with migrations"]
+      when "deploy"             then ["deployed", "deploy", "deploying"]
+      else [task, task, task]
+    end
+  end
+
+  def notify_campfire_on_execute
+    message = []
+    message << ":unlock:" if override_locking?
+    message << "#{user.login.humanize} is #{humanized_task.last} #{stage.project.name.humanize} on #{stage.name}"
+
+    notify_campfire(message.join(" "))
+  end
+
+  def notify_campfire_on_complete
+    action = case status
+      when STATUS_FAILED   then "failed to #{humanized_task[1]}"
+      when STATUS_SUCCESS  then "successfully #{humanized_task.first}"
+      when STATUS_CANCELED then "canceled #{humanized.last}"
+      else "#{status} #{humanized_task.last}"
+    end
+
+    message = []
+    message << ":exclamation:"
+    message << "#{user.login.humanize} #{action} #{stage.project.name.humanize} on #{stage.name}"
+
+    notify_campfire(message.join(" "), false)
+  end
+
+  def notify_campfire(message, add_description = true)
+    begin
+      campfire_config = YAML.load_file(Rails.root.join("config/campfire.yml").to_s)
+      campfire = Tinder::Campfire.new(campfire_config["subdomain"], :username => campfire_config["username"], :password => campfire_config["password"])
+    rescue
+      return
+    end
+
+    if campfire_room = campfire.find_room_by_id(campfire_config["room"])
+      campfire_room.speak message
+
+      if add_description && description.present?
+        campfire_room.paste description.strip.gsub(/\r\n/, "\n")
+      end
     end
   end
 end
