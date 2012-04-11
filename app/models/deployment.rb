@@ -246,8 +246,13 @@ class Deployment < ActiveRecord::Base
     message = []
     message << ":unlock:" if override_locking?
     message << "#{user.login.humanize} is #{humanized_task.last} #{stage.project.name.humanize} on #{stage.name}"
+    message = message.join(" ")
 
-    notify_campfire(message.join(" "))
+    campfire_room do |room|
+      room.speak(message)
+      room.paste(description.strip.gsub(/\r\n/, "\n")) if description.present?
+      room.play("pushit")
+    end
   end
 
   def notify_campfire_on_complete
@@ -261,23 +266,27 @@ class Deployment < ActiveRecord::Base
     message = []
     message << ":warning:" if canceled? || failed?
     message << "#{user.login.humanize} #{action} #{stage.project.name.humanize} on #{stage.name}"
+    message = message.join(" ")
 
-    notify_campfire(message.join(" "), false)
+    campfire_room do |room|
+      room.speak(message)
+      room.play("greatjob") if success?
+      room.play("drama")    if failed?
+      room.play("trombone") if canceled?
+    end
   end
 
-  def notify_campfire(message, add_description = true)
+  def campfire_room
     begin
       campfire_config = YAML.load_file(Rails.root.join("config/campfire.yml").to_s)
       campfire = Tinder::Campfire.new(campfire_config["subdomain"], :username => campfire_config["username"], :password => campfire_config["password"])
-    rescue
+    rescue error
       return
     end
 
-    if campfire_room = campfire.find_room_by_id(campfire_config["room"])
-      campfire_room.speak message
-
-      if add_description && description.present?
-        campfire_room.paste description.strip.gsub(/\r\n/, "\n")
+    if campfire_config["room"]
+      if room = campfire_config["room"].is_a?(Fixnum) ? campfire.find_room_by_id(campfire_config["room"]) : campfire.find_room_by_name(campfire_config["room"])
+        yield room
       end
     end
   end
