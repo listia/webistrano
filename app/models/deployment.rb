@@ -237,7 +237,7 @@ class Deployment < ActiveRecord::Base
       when "deploy:web:disable" then ["disabled", "disable", "disabling"]
       when "deploy:web:enable"  then ["enabled", "enable", "enabling"]
       when "deploy:restart"     then ["restarted", "restart", "restarting"]
-      when "deploy:migrations"  then ["deployed and migrated", "deploy and migrate", "deploying with migrations"]
+      when "deploy:migrations"  then ["deployed and migrated", "deploy and migrate", "deploying and migrating"]
       when "deploy"             then ["deployed", "deploy", "deploying"]
       else [task, task, task]
     end
