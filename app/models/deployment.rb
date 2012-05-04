@@ -291,7 +291,7 @@ class Deployment < ActiveRecord::Base
     begin
       campfire_config = YAML.load_file(Rails.root.join("config/campfire.yml").to_s)
       campfire = Tinder::Campfire.new(campfire_config["subdomain"], :username => campfire_config["username"], :password => campfire_config["password"])
-    rescue error
+    rescue
       return
     end
 
