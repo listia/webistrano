@@ -251,9 +251,9 @@ class Deployment < ActiveRecord::Base
 
     campfire_room do |room|
       room.speak(message)
+      room.speak(url) if url.present?
       room.paste(description.strip.gsub(/\r\n/, "\n")) if description.present?
       room.play("pushit")
-      room.speak(url) if url.present?
     end
   end
 
