@@ -14,6 +14,7 @@ class Deployment < ActiveRecord::Base
   attr_accessor :prompt_config
   
   attr_accessor :override_locking
+  attr_accessor :url
   
   after_create :add_stage_roles
   
@@ -252,6 +253,7 @@ class Deployment < ActiveRecord::Base
       room.speak(message)
       room.paste(description.strip.gsub(/\r\n/, "\n")) if description.present?
       room.play("pushit")
+      room.speak(url) if url.present?
     end
   end
 

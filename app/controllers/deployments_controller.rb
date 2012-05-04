@@ -130,6 +130,7 @@ class DeploymentsController < ApplicationController
       @deployment.prompt_config = params[:deployment][:prompt_config] rescue {}
       @deployment.stage = current_stage
       @deployment.user = current_user
+      @deployment.url = project_stage_deployment_url(@deployment.stage.project, @deployment.stage, @deployment)
     end
   end
   
