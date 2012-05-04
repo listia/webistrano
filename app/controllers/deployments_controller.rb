@@ -48,7 +48,7 @@ class DeploymentsController < ApplicationController
     
     respond_to do |format|
       if populate_deployment_and_fire
-        
+        @deployment.url = project_stage_deployment_url(@project, @stage, @deployment)
         @deployment.deploy_in_background!
 
         format.html { redirect_to project_stage_deployment_url(@project, @stage, @deployment)}
@@ -130,7 +130,6 @@ class DeploymentsController < ApplicationController
       @deployment.prompt_config = params[:deployment][:prompt_config] rescue {}
       @deployment.stage = current_stage
       @deployment.user = current_user
-      @deployment.url = project_stage_deployment_url(@deployment.stage.project, @deployment.stage, @deployment)
     end
   end
   
