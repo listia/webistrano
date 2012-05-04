@@ -265,9 +265,18 @@ class Deployment < ActiveRecord::Base
       else "#{status} #{humanized_task.last}"
     end
 
+    time_units = []
+
+    if completed_at && created_at
+      time_elapsed = (completed_at - created_at).to_i
+      time_units << "#{(time_elapsed / 60).to_i}m" if time_elapsed > 60
+      time_units << "#{(time_elapsed % 60).to_i}s"
+    end
+
     message = []
     message << ":warning:" if canceled? || failed?
     message << "#{user.login.humanize} #{action} #{stage.project.name.humanize} on #{stage.name}"
+    message << "(#{time_units.join(" ")})" unless time_units.empty?
     message = message.join(" ")
 
     campfire_room do |room|
