@@ -3,8 +3,8 @@
 <head>
 </head>
 <body style="font-family: arial">
-  <h3><%= @deployment.stage.project.name %></h3>
-  <h1><%= @deployment.stage.name.humanize %></h1>
+  <h3 style="padding: 0; margin: 0 0 5px"><%= @deployment.stage.project.name %></h3>
+  <h1 style="padding: 0; margin: 0 0 5px"><%= @deployment.stage.name.humanize %></h1>
   <table border="1">
     <tr>
       <th style="text-align: left">Task</th>
@@ -35,12 +35,12 @@
     </tr>
   </table>
 
-  <h3>Comment</h3>
+  <h3 style="padding: 0; margin: 0 0 5px">Comment</h3>
   <div style="font-family: Monaco,sans-serif; font-size: 12px">
-    <%= @deployment.description %>
+    <%= simple_format(@deployment.description) %>
   </div>
 
-  <h3>Log</h3>
+  <h3 style="padding: 0; margin: 0 0 5px">Log</h3>
   <div style="font-family: Monaco,sans-serif; font-size: 10px">
     <% if @deployment.log.present? %>
       <%= simple_format(@deployment.log) %>
