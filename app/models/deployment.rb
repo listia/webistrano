@@ -256,6 +256,8 @@ class Deployment < ActiveRecord::Base
   end
 
   def notify_campfire_on_execute
+    return if stage.configuration_parameters.find_by_name('notify_campfire').try(:value) != 'true'
+
     message = []
     message << ":unlock:" if override_locking?
     message << "#{user.login.humanize} is #{humanized_task.last} #{stage.project.name.humanize} on #{stage.name}"
@@ -270,6 +272,8 @@ class Deployment < ActiveRecord::Base
   end
 
   def notify_campfire_on_complete
+    return if stage.configuration_parameters.find_by_name('notify_campfire').try(:value) != 'true'
+
     action = case status
       when STATUS_FAILED   then "failed to #{humanized_task[1]}"
       when STATUS_SUCCESS  then "successfully #{humanized_task.first}"
