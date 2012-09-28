@@ -298,7 +298,7 @@ class Deployment < ActiveRecord::Base
     campfire_room do |room|
       room.speak(message)
       room.play("greatjob") if success?
-      room.play("drama")    if failed?
+      room.play("noooo")    if failed?
       room.play("trombone") if canceled?
     end
   end
