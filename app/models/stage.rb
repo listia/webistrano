@@ -151,6 +151,13 @@ class Stage < ActiveRecord::Base
     other_self.update_attribute(:locked_by_deployment_id, deployment.id)
     self.reload
   end
+
+  def github_compare_url
+    return unless github_path = project.configuration_parameters.find_by_name("github").try(:value)
+    return unless previous_deployment = deployments.first(:conditions => ["created_at <= NOW() AND task IN (?) AND status = ?", Deployment::DEPLOY_TASKS, Deployment::STATUS_SUCCESS])
+    branch = project.configuration_parameters.find_by_name("branch").try(:value) || "master"
+    "https://github.com/#{github_path}/compare/#{previous_deployment.revision}...#{branch}"
+  end
   
   protected
   def add_deployment_problem(key, desc)
