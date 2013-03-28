@@ -277,7 +277,7 @@ class Deployment < ActiveRecord::Base
     action = case status
       when STATUS_FAILED   then "failed to #{humanized_task[1]}"
       when STATUS_SUCCESS  then "successfully #{humanized_task.first}"
-      when STATUS_CANCELED then "canceled #{humanized.last}"
+      when STATUS_CANCELED then "canceled #{humanized_task.last}"
       else "#{status} #{humanized_task.last}"
     end
 
