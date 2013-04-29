@@ -365,15 +365,15 @@ class Deployment < ActiveRecord::Base
     [
       :hipchat_token,
       :hipchat_room_name
-    ].map { |option_name| stage.effective_configuration[option_name.to_s].try(:value) }.all?(&:present?)
+    ].map { |option_name| stage.effective_configuration(option_name).try(:value) }.all?(&:present?)
   end
 
   def hipchat
-    @hipchat ||= HipChat::Client.new(stage.effective_configuration["hipchat_token"]).value
+    @hipchat ||= HipChat::Client.new(stage.effective_configuration(:hipchat_token).value)
   end
 
   def hipchat_rooms
-    Array.wrap(stage.effective_configuration["hipchat_room_name"].value).map do |room_name|
+    Array.wrap(stage.effective_configuration(:hipchat_room_name).value).map do |room_name|
       hipchat[room_name]
     end
   end
