@@ -273,6 +273,7 @@ class Deployment < ActiveRecord::Base
     if description.present?
       message << "<pre>#{description.strip.gsub(/\r\n/, "\n")}</pre>"
     end
+    message = message.join(" ")
 
     hipchat_rooms.each do |room|
       room.send("Deploy", message, :notify => true)
