@@ -270,9 +270,6 @@ class Deployment < ActiveRecord::Base
       message << humanized_task.last
     end
     message << "<b>#{stage.project.name.humanize}</b> on <b>#{stage.name}</b>"
-    if github_compare_url
-      message << "(<a href=\"#{github_compare_url}\"><code>#{revision.first(6)}</code></a>)"
-    end
     if description.present?
       message << "<pre>#{description.strip.gsub(/\r\n/, "\n")}</pre>"
     end
@@ -308,7 +305,11 @@ class Deployment < ActiveRecord::Base
     end
 
     message = []
-    message << "#{user.login.humanize} #{action} <b>#{stage.project.name.humanize}</b> on <b>#{stage.name}</b>"
+    message << "#{user.login.humanize} #{action} <b>#{stage.project.name.humanize}</b>"
+    if success? && ["deploy", "deploy:migrations"].include?(task) && github_compare_url && revision
+      message << "@ <a href=\"#{github_compare_url}\"><code>#{revision.first(7)}</code></a>"
+    end
+    message << "on <b>#{stage.name}</b>"
     message << "<i>(#{time_units.join(" ")})</i>" unless time_units.empty?
     message = message.join(" ")
 
