@@ -270,6 +270,9 @@ class Deployment < ActiveRecord::Base
       message << humanized_task.last
     end
     message << "<b>#{stage.project.name.humanize}</b> on <b>#{stage.name}</b>"
+    if github_compare_url
+      message << "(<a href=\"#{github_compare_url}\"><code>#{revision.first(6)}</code></a>)"
+    end
     if description.present?
       message << "<pre>#{description.strip.gsub(/\r\n/, "\n")}</pre>"
     end
