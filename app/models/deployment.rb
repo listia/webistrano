@@ -124,24 +124,28 @@ class Deployment < ActiveRecord::Base
     save_completed_status!(STATUS_FAILED)
     notify_per_mail
     notify_campfire_on_complete
+    notify_hipchat_on_complete
   end
   
   def complete_successfully!
     save_completed_status!(STATUS_SUCCESS)
     notify_per_mail
     notify_campfire_on_complete
+    notify_hipchat_on_complete
   end
   
   def complete_canceled!
     save_completed_status!(STATUS_CANCELED)
     notify_per_mail
     notify_campfire_on_complete
+    notify_hipchat_on_complete
   end
   
   # deploy through Webistrano::Deployer in background (== other process)
   # TODO - at the moment `Unix &` hack
   def deploy_in_background! 
     notify_campfire_on_execute
+    notify_hipchat_on_execute
 
     unless RAILS_ENV == 'test'   
       RAILS_DEFAULT_LOGGER.info "Calling other ruby process in the background in order to deploy deployment #{self.id} (stage #{self.stage.id}/#{self.stage.name})"
@@ -255,6 +259,60 @@ class Deployment < ActiveRecord::Base
     end
   end
 
+  def notify_hipchat_on_execute
+    return unless notify_hipchat?
+
+    message = []
+    message << "#{user.login.humanize} is"
+    if url.present?
+      message << "<a href=\"#{url}\">#{humanized_task.last}</a>"
+    else
+      message << humanized_task.last
+    end
+    message << "<b>#{stage.project.name.humanize}<b> on <b>#{stage.name}</b>"
+    if description.present?
+      message << "<pre>#{description.strip.gsub(/\r\n/, "\n")}</pre>"
+    end
+
+    hipchat_rooms.each do |room|
+      room.send("Deploy", message, :notify => true)
+    end
+  end
+
+  def notify_hipchat_on_complete
+    return unless notify_hipchat?
+
+    color = "green"
+
+    action = case status
+      when STATUS_FAILED   then "failed to #{humanized_task[1]}"
+      when STATUS_SUCCESS  then "successfully #{humanized_task.first}"
+      when STATUS_CANCELED then "canceled #{humanized_task.last}"
+      else "#{status} #{humanized_task.last}"
+    end
+
+    time_units = []
+
+    if completed_at && created_at
+      time_elapsed = (completed_at - created_at).to_i
+      time_units << "#{(time_elapsed / 60).to_i}m" if time_elapsed > 60
+      time_units << "#{(time_elapsed % 60).to_i}s"
+    end
+
+    if canceled? || failed?
+      color = "red"
+    end
+
+    message = []
+    message << "#{user.login.humanize} #{action} <b>#{stage.project.name.humanize}</b> on <b>#{stage.name}</b>"
+    message << "<i>(#{time_units.join(" ")})</i>" unless time_units.empty?
+    message = message.join(" ")
+
+    hipchat_rooms.each do |room|
+      room.send("Deploy", message, :notify => true, :color => color)
+    end
+  end
+
   def notify_campfire_on_execute
     return if stage.configuration_parameters.find_by_name('notify_campfire').try(:value) != 'true'
 
@@ -300,6 +358,23 @@ class Deployment < ActiveRecord::Base
       room.play("greatjob") if success?
       room.play("noooo")    if failed?
       room.play("trombone") if canceled?
+    end
+  end
+
+  def notify_hipchat?
+    [
+      :hipchat_token,
+      :hipchat_room_name
+    ].map { |option_name| stage.effective_configuration[option_name.to_s].try(:value) }.all?(&:present?)
+  end
+
+  def hipchat
+    @hipchat ||= HipChat::Client.new(stage.effective_configuration["hipchat_token"]).value
+  end
+
+  def hipchat_rooms
+    Array.wrap(stage.effective_configuration["hipchat_room_name"].value).map do |room_name|
+      hipchat[room_name]
     end
   end
 
