@@ -269,7 +269,7 @@ class Deployment < ActiveRecord::Base
     else
       message << humanized_task.last
     end
-    message << "<b>#{stage.project.name.humanize}<b> on <b>#{stage.name}</b>"
+    message << "<b>#{stage.project.name.humanize}</b> on <b>#{stage.name}</b>"
     if description.present?
       message << "<pre>#{description.strip.gsub(/\r\n/, "\n")}</pre>"
     end
