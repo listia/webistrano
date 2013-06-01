@@ -123,28 +123,24 @@ class Deployment < ActiveRecord::Base
   def complete_with_error!
     save_completed_status!(STATUS_FAILED)
     notify_per_mail
-    notify_campfire_on_complete
     notify_hipchat_on_complete
   end
   
   def complete_successfully!
     save_completed_status!(STATUS_SUCCESS)
     notify_per_mail
-    notify_campfire_on_complete
     notify_hipchat_on_complete
   end
   
   def complete_canceled!
     save_completed_status!(STATUS_CANCELED)
     notify_per_mail
-    notify_campfire_on_complete
     notify_hipchat_on_complete
   end
   
   # deploy through Webistrano::Deployer in background (== other process)
   # TODO - at the moment `Unix &` hack
   def deploy_in_background! 
-    notify_campfire_on_execute
     notify_hipchat_on_execute
 
     unless RAILS_ENV == 'test'   
@@ -318,54 +314,6 @@ class Deployment < ActiveRecord::Base
     end
   end
 
-  def notify_campfire_on_execute
-    return if stage.configuration_parameters.find_by_name('notify_campfire').try(:value) != 'true'
-
-    message = []
-    message << ":unlock:" if override_locking?
-    message << "#{user.login.humanize} is #{humanized_task.last} #{stage.project.name.humanize} on #{stage.name}"
-    message = message.join(" ")
-
-    campfire_room do |room|
-      room.speak(message)
-      room.speak(url) if url.present?
-      room.paste(description.strip.gsub(/\r\n/, "\n")) if description.present?
-      room.play("pushit")
-    end
-  end
-
-  def notify_campfire_on_complete
-    return if stage.configuration_parameters.find_by_name('notify_campfire').try(:value) != 'true'
-
-    action = case status
-      when STATUS_FAILED   then "failed to #{humanized_task[1]}"
-      when STATUS_SUCCESS  then "successfully #{humanized_task.first}"
-      when STATUS_CANCELED then "canceled #{humanized_task.last}"
-      else "#{status} #{humanized_task.last}"
-    end
-
-    time_units = []
-
-    if completed_at && created_at
-      time_elapsed = (completed_at - created_at).to_i
-      time_units << "#{(time_elapsed / 60).to_i}m" if time_elapsed > 60
-      time_units << "#{(time_elapsed % 60).to_i}s"
-    end
-
-    message = []
-    message << ":warning:" if canceled? || failed?
-    message << "#{user.login.humanize} #{action} #{stage.project.name.humanize} on #{stage.name}"
-    message << "(#{time_units.join(" ")})" unless time_units.empty?
-    message = message.join(" ")
-
-    campfire_room do |room|
-      room.speak(message)
-      room.play("greatjob") if success?
-      room.play("noooo")    if failed?
-      room.play("trombone") if canceled?
-    end
-  end
-
   def notify_hipchat?
     [
       :hipchat_token,
@@ -380,21 +328,6 @@ class Deployment < ActiveRecord::Base
   def hipchat_rooms
     Array.wrap(stage.effective_configuration(:hipchat_room_name).value).map do |room_name|
       hipchat[room_name]
-    end
-  end
-
-  def campfire_room
-    begin
-      campfire_config = YAML.load_file(Rails.root.join("config/campfire.yml").to_s)
-      campfire = Tinder::Campfire.new(campfire_config["subdomain"], :username => campfire_config["username"], :password => campfire_config["password"])
-    rescue
-      return
-    end
-
-    if campfire_config["room"]
-      if room = campfire_config["room"].is_a?(Fixnum) ? campfire.find_room_by_id(campfire_config["room"]) : campfire.find_room_by_name(campfire_config["room"])
-        yield room
-      end
     end
   end
 end

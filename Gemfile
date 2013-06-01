@@ -8,7 +8,6 @@ gem "syntax", "1.0.0"
 gem "capistrano", "2.7.0"
 gem "open4", "0.9.3"
 gem "exception_notification", "2.3.3.0"
-gem "tinder", "~> 1.8.0"
 gem "hipchat", "~> 0.8.0"
 gem "passenger", "~> 4.0.2"
 
