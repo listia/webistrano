@@ -247,13 +247,10 @@ module Webistrano
         false
       when 'nil'
         nil
-      when /\A\[(.*)\]/
-        $1.split(',').map{|subval| type_cast(subval)}
+      when /\A\[(.*)\]/, /\A\{(.*)\}/
+        eval(val) rescue nil
       when /\A\{(.*)\}/
-        $1.split(',').collect{|pair| pair.split('=>')}.inject({}) do |hash, (key, value)|
-	        hash[type_cast(key)] = type_cast(value)
-	        hash
-	      end
+        eval(val) rescue nil
       else # symbol or string
         if cvs_root_defintion?(val)
           val.to_s
