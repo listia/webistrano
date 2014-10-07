@@ -272,7 +272,11 @@ class Deployment < ActiveRecord::Base
     message = message.join(" ")
 
     hipchat_rooms.each do |room|
-      room.send("Deploy", message, :notify => true)
+      begin 
+        room.send("Deploy", message, :notify => true)
+      rescue
+
+      end
     end
   end
 
@@ -310,7 +314,11 @@ class Deployment < ActiveRecord::Base
     message = message.join(" ")
 
     hipchat_rooms.each do |room|
-      room.send("Deploy", message, :notify => true, :color => color)
+      begin 
+        room.send("Deploy", message, :notify => true, :color => color)
+      rescue 
+
+      end
     end
   end
 
