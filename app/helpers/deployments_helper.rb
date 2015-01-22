@@ -1,5 +1,4 @@
 module DeploymentsHelper
-  
   def input_type(name)
     if name.match(/password/)
       "password"
@@ -8,24 +7,29 @@ module DeploymentsHelper
     end
   end
 
-  def if_disabled_host?(host, role, text)
-    if @deployment.excluded_host_ids.include?(host.id) || !role.precheck
-      text
-    else
+  def disabled_text(host, role, text)
+    if deployable?(host, role)
       ''
+    else
+      text
     end
   rescue
     ''
   end
 
-  def if_enabled_host?(host, role, text)
-    if @deployment.excluded_host_ids.include?(host.id) || !role.precheck
-      ''
-    else
+  def enabled_text(host, role, text)
+    if deployable?(host, role)
       text
+    else
+      ''
     end
   rescue
     text
   end
 
+  private
+
+  def deployable?(host, role)
+    !@deployment.excluded_host_ids.include?(host.id) && role.precheck
+  end
 end
