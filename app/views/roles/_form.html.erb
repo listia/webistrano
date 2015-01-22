@@ -42,6 +42,10 @@
   <b>No symlink</b> (tick this if you do not want to update the <i>current</i> symlink)<br />
   <%= check_box 'role', 'no_symlink', :style =>'' %>
 </p>
+<p>
+  <b>Precheck</b> (tick this if you want to check this host by default)<br />
+  <%= check_box 'role', 'precheck', :style =>'' %>
+</p>
 
 <% content_for(:page_scripts) do %>
   <script type="text/javascript">

@@ -90,18 +90,21 @@
   <div class="small_box_top"></div>
   <div class="small_box_middle" style="min-height: 140px; *height: 160px;">
 		 <h3>Deploying hosts</h3>
-		  <% if @stage.roles.count > 0 %>
+     <% if @stage.roles.count > 0 %>
+        <% roles = @stage.roles.to_a %>
 		    <form name="excluded_hosts_form" id="excluded_hosts_form">
           <table border="0" width="210">
             <% for host in @stage.hosts.sort_by{|x| x.name} %>
-              <tr class="toggle_host <%= if_disabled_host?(host,'disabled_host') %> <%= if_enabled_host?(host,'enabled_host') %>" id="host_<%=h host.id %>">
+              <% role = roles.find{ |r| r.host_id == host.id } %>
+
+              <tr class="toggle_host <%= if_disabled_host?(host, role, 'disabled_host') %> <%= if_enabled_host?(host, role, 'enabled_host') %>" id="host_<%=h host.id %>">
                 <td width="1%" style="padding:3px 0px 0px 0px;" valign="middle" align="center">
-                  <%= image_tag('peritor_theme/checkbox_on.gif', 
-                                :id => "host_#{host.id}_on", 
-                                :style => if_disabled_host?(host,'display:none;') + 'cursor:pointer;')%>
-                  <%= image_tag('peritor_theme/checkbox_off.gif', 
-                                :id => "host_#{host.id}_off", 
-                                :style => if_enabled_host?(host,'display:none;') + 'cursor:pointer;')%>
+                  <%= image_tag('peritor_theme/checkbox_on.gif',
+                                :id => "host_#{host.id}_on",
+                                :style => if_disabled_host?(host, role, 'display:none;') + 'cursor:pointer;')%>
+                  <%= image_tag('peritor_theme/checkbox_off.gif',
+                                :id => "host_#{host.id}_off",
+                                :style => if_enabled_host?(host, role, 'display:none;') + 'cursor:pointer;')%>
                 </td>
                 <td width="99%" title="<%=h h(host.name) %>" class="toggle_host" id="toggle_host_<%=h host.id %>">
                   <div style="overflow: hidden; padding-left: 5px; width: 180px; white-space: nowrap; cursor: pointer;"><%=h host.name %></div>
