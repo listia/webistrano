@@ -76,6 +76,18 @@
       on.up('tr').addClassName('enabled_host');
       on.up('tr').removeClassName('disabled_host');
     }
+
+    function check_all_host() {
+      <%= @stage.hosts.map(&:id) %>.each(function(host_id){
+         enable_host(host_id);
+      });
+    }
+
+    function uncheck_all_host() {
+      <%= @stage.hosts.map(&:id) %>.each(function(host_id){
+         disable_host(host_id);
+      });
+    }
     
     Event.observe(window, 'load', function(){    
       $$('tr.toggle_host').each(function(el){
@@ -89,7 +101,9 @@
 <div class="small_box">
   <div class="small_box_top"></div>
   <div class="small_box_middle" style="min-height: 140px; *height: 160px;">
-		 <h3>Deploying hosts</h3>
+    <h3>Deploying hosts</h3>
+      <%= link_to_function "Check All", "check_all_host()"%> | 
+      <%= link_to_function "UnCheck All", "uncheck_all_host()"%>
      <% if @stage.roles.count > 0 %>
         <% roles = @stage.roles.to_a %>
 		    <form name="excluded_hosts_form" id="excluded_hosts_form">
