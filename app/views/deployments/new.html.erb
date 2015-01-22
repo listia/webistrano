@@ -1,3 +1,5 @@
+<% roles = @stage.roles.to_a %>
+
 <% if current_stage.locked? %>
   <% content_for(:flash_content) do %>
     <%= locking_flash( render :partial => 'lock_info', :locals => {:stage => current_stage, :deployment => @deployment}) %>
@@ -29,7 +31,8 @@
   
   <!-- hidden ids of hosts to exlude -->
   <% for host in @stage.hosts.sort_by{|x| x.name} %>
-    <input style="display:none;" type="checkbox" value="<%=h host.id %>" name="deployment[excluded_host_ids][]" id="deployment_excluded_host_ids_<%=h host.id %>" <%= (@deployment.excluded_host_ids.include?(host.id) ? 'checked="checked"' : ''  rescue '')%>/></td>
+    <% role = roles.find{ |r| r.host_id == host.id } %>
+    <input style="display:none;" type="checkbox" value="<%=h host.id %>" name="deployment[excluded_host_ids][]" id="deployment_excluded_host_ids_<%=h host.id %>" <%= if_disabled_host?(host, role, 'checked="checked"') %>/></td>
   <% end %>
   
   <%= link_to 'Back to stage', project_stage_path(@project, @stage), :class => 'arrow_link ontheright' %>
@@ -105,7 +108,6 @@
       <%= link_to_function "Check All", "check_all_host()"%> | 
       <%= link_to_function "UnCheck All", "uncheck_all_host()"%>
      <% if @stage.roles.count > 0 %>
-        <% roles = @stage.roles.to_a %>
 		    <form name="excluded_hosts_form" id="excluded_hosts_form">
           <table border="0" width="210">
             <% for host in @stage.hosts.sort_by{|x| x.name} %>
