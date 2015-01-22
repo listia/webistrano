@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110512144542) do
+ActiveRecord::Schema.define(:version => 20150122045734) do
 
   create_table "configuration_parameters", :force => true do |t|
     t.string   "name"
@@ -96,6 +96,7 @@ ActiveRecord::Schema.define(:version => 20110512144542) do
     t.integer  "no_release", :default => 0
     t.integer  "ssh_port"
     t.integer  "no_symlink", :default => 0
+    t.boolean  "precheck",   :default => true
   end
 
   add_index "roles", ["host_id"], :name => "index_roles_on_host_id"

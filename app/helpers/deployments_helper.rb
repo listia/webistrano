@@ -7,12 +7,25 @@ module DeploymentsHelper
       'text'
     end
   end
-  
-  def if_disabled_host?(host, text)
-    (@deployment.excluded_host_ids.include?(host.id) ? text : '' rescue '')
+
+  def if_disabled_host?(host, role, text)
+    if @deployment.excluded_host_ids.include?(host.id) || !role.precheck
+      text
+    else
+      ''
+    end
+  rescue
+    ''
   end
-  
-  def if_enabled_host?(host, text)
-    (@deployment.excluded_host_ids.include?(host.id) ? '' : text rescue text)
+
+  def if_enabled_host?(host, role, text)
+    if @deployment.excluded_host_ids.include?(host.id) || !role.precheck
+      ''
+    else
+      text
+    end
+  rescue
+    text
   end
+
 end
