@@ -24,7 +24,7 @@
     <% @stage.prompt_configurations.each do |conf| %>
       <p>
         <b>Config: <%=h conf.name %></b><br />
-        <input type="<%=h input_type(conf.name) %>" id="deployment_prompt_config_<%=h conf.name %>" name="deployment[prompt_config][<%=h conf.name %>]" style="width:330px;" value="<%=h @deployment.prompt_config[conf.name.to_sym]%>" />
+        <input type="<%=h input_type(conf.name) %>" id="deployment_prompt_config_<%=h conf.name %>" name="deployment[prompt_config][<%=h conf.name %>]" style="width:330px;" value="<%=h @deployment.prompt_config[conf.name.to_sym] || conf.value %>" />
       </p>
     <% end %>
   <% end %>
@@ -106,7 +106,7 @@
   <div class="small_box_middle" style="min-height: 140px; *height: 160px;">
     <h3>Deploying hosts</h3>
       <%= link_to_function "Check All", "check_all_host()"%> |
-      <%= link_to_function "UnCheck All", "uncheck_all_host()"%>
+      <%= link_to_function "Uncheck All", "uncheck_all_host()"%>
      <% if @stage.roles.count > 0 %>
 		    <form name="excluded_hosts_form" id="excluded_hosts_form">
           <table border="0" width="210">
