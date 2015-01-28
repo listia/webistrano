@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150122045734) do
+ActiveRecord::Schema.define(:version => 20150128032106) do
 
   create_table "configuration_parameters", :force => true do |t|
     t.string   "name"
@@ -35,6 +35,7 @@ ActiveRecord::Schema.define(:version => 20150122045734) do
     t.string   "revision"
     t.integer  "pid"
     t.string   "status",            :default => "running"
+    t.string   "branch",            :default => "master",  :null => false
   end
 
   add_index "deployments", ["stage_id"], :name => "index_deployments_on_stage_id"
