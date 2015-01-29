@@ -86,6 +86,7 @@ module Webistrano
     # save the revision in the DB if possible
     def save_revision(config)
       if config.fetch(:real_revision)
+        @deployment.branch = @deployment.prompt_config["branch"] || "master"
         @deployment.revision = config.fetch(:real_revision)
         @deployment.save!
       end

@@ -154,7 +154,7 @@ class Stage < ActiveRecord::Base
 
   def github_compare_url
     return unless github_path = project.configuration_parameters.find_by_name("github").try(:value)
-    return unless previous_deployment = deployments.first(:conditions => ["created_at <= ? AND task IN (?) AND status = ?", Time.now, Deployment::DEPLOY_TASKS, Deployment::STATUS_SUCCESS], :order => "id DESC")
+    return unless previous_deployment = deployments.first(:conditions => ["branch = 'master' AND created_at <= ? AND task IN (?) AND status = ?", Time.now, Deployment::DEPLOY_TASKS, Deployment::STATUS_SUCCESS], :order => "id DESC")
     branch = project.configuration_parameters.find_by_name("branch").try(:value) || "master"
     "https://github.com/#{github_path}/compare/#{previous_deployment.revision}...#{branch}"
   end
