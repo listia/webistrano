@@ -24,7 +24,11 @@
     <% @stage.prompt_configurations.each do |conf| %>
       <p>
         <b>Config: <%=h conf.name %></b><br />
-        <input type="<%=h input_type(conf.name) %>" id="deployment_prompt_config_<%=h conf.name %>" name="deployment[prompt_config][<%=h conf.name %>]" style="width:330px;" value="<%=h @deployment.prompt_config[conf.name.to_sym] || conf.value %>" />
+        <% if conf.name == "branch" && @previous_deployment_branch %>
+          <input type="<%=h input_type(conf.name) %>" id="deployment_prompt_config_<%=h conf.name %>" name="deployment[prompt_config][<%=h conf.name %>]" style="width:330px;" value="<%=h @previous_deployment_branch %>" />
+        <% else %>
+          <input type="<%=h input_type(conf.name) %>" id="deployment_prompt_config_<%=h conf.name %>" name="deployment[prompt_config][<%=h conf.name %>]" style="width:330px;" value="<%=h @deployment.prompt_config[conf.name.to_sym] || conf.value %>" />
+        <% end %>
       </p>
     <% end %>
   <% end %>
