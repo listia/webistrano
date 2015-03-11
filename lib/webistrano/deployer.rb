@@ -22,7 +22,7 @@ module Webistrano
     
       @deployment = deployment
       
-      if(@deployment.task && !@deployment.new_record?)
+      if(!@deployment[:task].nil? && !@deployment.new_record?)
         # a read deployment
         @logger = Webistrano::Logger.new(deployment)
         @logger.level = Webistrano::Logger::TRACE
@@ -86,6 +86,7 @@ module Webistrano
     # save the revision in the DB if possible
     def save_revision(config)
       if config.fetch(:real_revision)
+        @deployment.branch = @deployment.prompt_config["branch"] || "master"
         @deployment.revision = config.fetch(:real_revision)
         @deployment.save!
       end
@@ -247,13 +248,10 @@ module Webistrano
         false
       when 'nil'
         nil
-      when /\A\[(.*)\]/
-        $1.split(',').map{|subval| type_cast(subval)}
+      when /\A\[(.*)\]/, /\A\{(.*)\}/
+        eval(val) rescue nil
       when /\A\{(.*)\}/
-        $1.split(',').collect{|pair| pair.split('=>')}.inject({}) do |hash, (key, value)|
-	        hash[type_cast(key)] = type_cast(value)
-	        hash
-	      end
+        eval(val) rescue nil
       else # symbol or string
         if cvs_root_defintion?(val)
           val.to_s

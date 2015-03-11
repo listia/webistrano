@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body style="font-family: arial">
+  <h3 style="padding: 0; margin: 0 0 5px"><%= @deployment.stage.project.name %></h3>
+  <h1 style="padding: 0; margin: 0 0 5px"><%= @deployment.stage.name.humanize %></h1>
+  <table border="1">
+    <tr>
+      <th style="text-align: left">Task</th>
+      <td><%= @deployment.task %></td>
+    </tr>
+    <tr>
+      <th style="text-align: left">Revision</th>
+      <td>
+        <%= link_to_if(@deployment.github_blob_url, @deployment.revision, @deployment.github_blob_url) %>
+        <% if @deployment.github_compare_url %>
+          (<%= link_to("changes", @deployment.github_compare_url) %>)
+        <% end %>
+      </td>
+    </tr>
+    <tr>
+      <th style="text-align: left">Status</th>
+      <td><%= @deployment.status %></td>
+    </tr>
+    <tr>
+      <th style="text-align: left">Started</th>
+      <td><%= @deployment.created_at.utc.to_s(:log) %></td>
+    </tr>
+      <th style="text-align: left">Completed</th>
+      <td><%= @deployment.completed_at.utc.to_s(:log) rescue nil %></td>
+    <tr>
+      <th style="text-align: left">User</th>
+      <td><%= @deployment.user.login %></td>
+    </tr>
+  </table>
+
+  <h3 style="padding: 0; margin: 0 0 5px">Comment</h3>
+  <div style="font-family: Monaco,sans-serif; font-size: 12px">
+    <%= simple_format(@deployment.description) %>
+  </div>
+
+  <h3 style="padding: 0; margin: 0 0 5px">Log</h3>
+  <div style="font-family: Monaco,sans-serif; font-size: 10px">
+    <% if @deployment.log.present? %>
+      <%= simple_format(@deployment.log) %>
+    <% end %>
+  </div>
+</body>
+</html>

@@ -10,7 +10,7 @@ class Role < ActiveRecord::Base
   validates_inclusion_of :no_symlink, :in => 0..1
   validates_uniqueness_of :name, :scope => [:host_id, :stage_id, :ssh_port], :message => 'already used with this host.'
   
-  attr_accessible :name, :primary, :host_id, :no_release, :no_symlink, :ssh_port, :custom_name
+  attr_accessible :name, :primary, :host_id, :no_release, :no_symlink, :ssh_port, :custom_name, :precheck
   
   attr_accessor :custom_name
   
@@ -78,17 +78,17 @@ class Role < ActiveRecord::Base
   
   # tells if this role had a successful setup
   def setup_done?
-    deployed_at_least_once? && self.deployments.any?{|x| Deployment::SETUP_TASKS.include?(x.task) && x.success? }
+    deployed_at_least_once? && self.deployments.exists?(:conditions => {"deployments.task" => Deployment::SETUP_TASKS, "deployments.status" => Deployment::STATUS_SUCCESS})
   end
   
   # tells if this role had a successful deployment (deploy)
   def deployed?
-    deployed_at_least_once? && self.deployments.any?{|x| Deployment::DEPLOY_TASKS.include?(x.task) && x.success? }
+    deployed_at_least_once? && self.deployments.exists?(:conditions => {"deployments.task" => Deployment::DEPLOY_TASKS, "deployments.status" => Deployment::STATUS_SUCCESS})
   end
   
   # tells if this role had any deployment at all
   def deployed_at_least_once?
-    !self.deployments.empty?
+    self.deployments.exists?
   end
   
   def status

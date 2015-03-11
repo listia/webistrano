@@ -8,13 +8,14 @@
   <table border="0" cellpadding="0" cellspacing="0">
     <tr>
       <td colspan="3">
-        <b>Value</b><br />
+        <b id="config-value">
+          <%= @configuration.prompt_on_deploy == 1 ? "Default Value" : "Value" %>
+        </b><br />
 	  </td>
 	</tr>
 	<tr>
 	  <td>
-        <% disabled = @configuration.prompt? ? {:disabled =>'disabled'} : {} %>
-        <%= text_field 'configuration', 'value', disabled.merge(:style =>'width: 330px') %>
+        <%= text_field 'configuration', 'value', :style =>'width: 330px' %>
       </td>
       <td style="padding:0px;">&nbsp;<b>or</b>&nbsp;</td>
       <td valign="bottom">
@@ -31,9 +32,9 @@
       Event.observe('configuration_prompt_on_deploy', 'change', function(){
 
         if( $F('configuration_prompt_on_deploy') == '1' ){
-          $('configuration_value').disable();
+          $('config-value').update('Default Value');
         } else {
-          $('configuration_value').enable();
+          $('config-value').update('Value');
         }
       
       });

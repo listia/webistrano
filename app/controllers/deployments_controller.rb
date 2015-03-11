@@ -30,6 +30,8 @@ class DeploymentsController < ApplicationController
   # GET /projects/1/stages/1/deployments/new
   def new
     @deployment = @stage.deployments.new
+    @previous_deployment_branch = @stage.deployments.find_by_id(params[:repeat]).try(:branch) if params[:repeat]
+
     @deployment.task = params[:task]
 
     # Allow description to be passed in via a URL parameter
@@ -48,7 +50,7 @@ class DeploymentsController < ApplicationController
     
     respond_to do |format|
       if populate_deployment_and_fire
-        
+        @deployment.url = project_stage_deployment_url(@project, @stage, @deployment)
         @deployment.deploy_in_background!
 
         format.html { redirect_to project_stage_deployment_url(@project, @stage, @deployment)}
