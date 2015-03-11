@@ -37,6 +37,13 @@
 		  <b>#Hosts:</b>
 		  <%=h @stage.hosts.count %>
 		</p>
+    <% @stage.github_compare_url.tap do |compare_url| %>
+      <% if compare_url %>
+        <p>
+          <%= link_to("Commits since last deploy", compare_url, :target => "_blank") %></b>
+        </p>
+      <% end %>
+    <% end %>
 		<br />
 		<%= link_to 'Edit stage', edit_project_stage_path(current_project, @stage), :class => 'arrow_link' %> | 
 		<%= link_to 'Delete stage', project_stage_path(current_project, @stage), :confirm => 'Are you sure?', :method => :delete, :class => 'arrow_link'  %> | 

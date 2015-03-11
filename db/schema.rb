@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110512144542) do
+ActiveRecord::Schema.define(:version => 20150311080623) do
 
   create_table "configuration_parameters", :force => true do |t|
     t.string   "name"
@@ -29,12 +29,13 @@ ActiveRecord::Schema.define(:version => 20110512144542) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.datetime "completed_at"
-    t.text     "description"
+    t.binary   "description"
     t.integer  "user_id"
     t.string   "excluded_host_ids"
     t.string   "revision"
     t.integer  "pid"
     t.string   "status",            :default => "running"
+    t.string   "branch",            :default => "master",  :null => false
   end
 
   add_index "deployments", ["stage_id"], :name => "index_deployments_on_stage_id"
@@ -96,6 +97,7 @@ ActiveRecord::Schema.define(:version => 20110512144542) do
     t.integer  "no_release", :default => 0
     t.integer  "ssh_port"
     t.integer  "no_symlink", :default => 0
+    t.boolean  "precheck",   :default => true
   end
 
   add_index "roles", ["host_id"], :name => "index_roles_on_host_id"
