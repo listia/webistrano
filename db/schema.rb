@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150128032106) do
+ActiveRecord::Schema.define(:version => 20150311080623) do
 
   create_table "configuration_parameters", :force => true do |t|
     t.string   "name"
@@ -29,7 +29,7 @@ ActiveRecord::Schema.define(:version => 20150128032106) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.datetime "completed_at"
-    t.text     "description"
+    t.binary   "description"
     t.integer  "user_id"
     t.string   "excluded_host_ids"
     t.string   "revision"
